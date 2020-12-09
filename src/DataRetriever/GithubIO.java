@@ -18,8 +18,6 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
-import java.util.concurrent.TimeUnit;
-
 
 import NumericTools.IntegerTool;
 
@@ -46,27 +44,10 @@ public class GithubIO {
 		String token = null;
 		token = variabile.readLine();
 		
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
-	    Date date = new Date();  
-	    System.out.println("prima di set credential");
-	    System.out.println(formatter.format(date)); 
-		try {
-			TimeUnit.MINUTES.sleep(0);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		client.setOAuth2Token(token);
 
-		Date date2 = new Date();  
-	    System.out.println("prima di repositoryservice");
-	    System.out.println(formatter.format(date2)); 
-		try {
-			TimeUnit.MINUTES.sleep(0);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		
 		RepositoryService service = new RepositoryService(client);
 		// Searching for the repository
@@ -74,26 +55,8 @@ public class GithubIO {
 		CommitService commitService = null;
 		List<RepositoryCommit> CommitList = null;
 		
-		Date date3 = new Date();  
-	    System.out.println("prima di getrepository");
-	    System.out.println(formatter.format(date3)); 
-		try {
-			TimeUnit.MINUTES.sleep(0);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		repo = service.getRepository(companyNameMin, projNameMin);
 		
-		Date date4 = new Date();  
-	    System.out.println("prima di commitservice");
-	    System.out.println(formatter.format(date4)); 
-		try {
-			TimeUnit.MINUTES.sleep(0);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		commitService = new CommitService(client);
 		
 		// Grep all commit of the repository
