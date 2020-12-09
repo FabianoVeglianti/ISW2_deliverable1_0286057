@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="Milestone1">
+    <property environment="env"/>
+    <property name="egit" value="../../eclipse/jar/org.eclipse.egit.github.core-2.1.5.jar"/>
+    <property name="json" value="../../eclipse/jar/java-json.jar"/>
+    <property name="gson" value="../../eclipse/jar/gson-2.8.2.jar"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="13"/>
+    <property name="source" value="13"/>
+    <path id="Milestone1.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="../../eclipse/jar/java-json.jar"/>
+        <pathelement location="../../eclipse/jar/org.eclipse.egit.github.core-2.1.5.jar"/>
+        <pathelement location="../../eclipse/jar/gson-2.8.2.jar"/>
+        <pathelement location="${egit}"/>
+        <pathelement location="${json}"/>
+        <pathelement location="${gson}"/>
+    </path>
+    <path id="run.CsvWriter.classpath">
+        <path refid="Milestone1.classpath"/>
+        <pathelement location="../../eclipse/jar/java-json.jar"/>
+        <pathelement location="../../eclipse/jar/org.eclipse.egit.github.core-2.1.5.jar"/>
+        <pathelement location="../../eclipse/jar/gson-2.8.2.jar"/>
+        <pathelement location="${egit}"/>
+        <pathelement location="${json}"/>
+        <pathelement location="${gson}"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="Milestone1.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+    <target name="CsvWriter">
+        <java classname="CSVHandler.CsvWriter" failonerror="true" fork="yes">
+            <classpath refid="run.CsvWriter.classpath"/>
+        </java>
+    </target>
+</project>
