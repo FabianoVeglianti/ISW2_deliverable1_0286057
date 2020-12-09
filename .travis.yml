@@ -1,5 +1,10 @@
 language: java
 jdk:
 - openjdk11
+addons:
+  sonarcloud:
+    organization: fabianoveglianti
+    token: 7d9bf51d77d5e138f0e32a58c2c98cd64c31849d
 script:
 - ant build
+- sonar-scanner
