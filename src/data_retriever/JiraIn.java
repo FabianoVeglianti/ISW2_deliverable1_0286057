@@ -1,7 +1,6 @@
 package data_retriever;
 
 import java.io.BufferedReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,48 +31,40 @@ public class JiraIn {
 		myLogger.info("Parsing fixed bug from Jira ...");
 		JSONObject json = null;
 		JSONArray issues = null;
-		FileWriter fw = null;
-		try {
-			fw = new FileWriter("./json.txt");
-			do {
-				// Only gets a max of 1000 at a time, so must do this multiple times if bugs
-				// >1000
-				j = i + 1000;
-				String url = "https://issues.apache.org/jira/rest/api/2/search?jql=project=%22" + projName
-						+ "%22AND%22issueType%22=%22Bug%22AND(%22status%22=%22closed%22OR"
-						+ "%22status%22=%22resolved%22)AND%22resolution%22=%22fixed%22&fields=key,fixVersions,resolutiondate,versions,created&startAt="
-						+ i.toString() + "&maxResults=" + j.toString();
-	
-				json = readJsonFromUrl(url);
+
+		do {
+			// Only gets a max of 1000 at a time, so must do this multiple times if bugs
+			// >1000
+			j = i + 1000;
+			String url = "https://issues.apache.org/jira/rest/api/2/search?jql=project=%22" + projName
+					+ "%22AND%22issueType%22=%22Bug%22AND(%22status%22=%22closed%22OR"
+					+ "%22status%22=%22resolved%22)AND%22resolution%22=%22fixed%22&fields=key,fixVersions,resolutiondate,versions,created&startAt="
+					+ i.toString() + "&maxResults=" + j.toString();
+
+			json = readJsonFromUrl(url);
+			
+			
+			issues = json.getJSONArray("issues");
+
+			total = json.getInt("total");
+
+			for (; i < total && i < j; i++) {
+				// Iterate through each bug
+				String key = null;
+
+				key = issues.getJSONObject(i % 1000).get("key").toString();
+			
+				fixedBugs.add(key);	
 				
 				
-				issues = json.getJSONArray("issues");
-	
-				total = json.getInt("total");
-	
-				for (; i < total && i < j; i++) {
-					// Iterate through each bug
-					String key = null;
-	
-					key = issues.getJSONObject(i % 1000).get("key").toString();
-				
-					fixedBugs.add(key);	
 					
-					
-						
-					fw.write(issues.getJSONObject(i % 1000).toString()+"\n");
+			
+	
+				
+			}
+			
+		} while (i < total);
 		
-					
-				}
-				
-			} while (i < total);
-			fw.flush();
-		}catch (IOException | JSONException e) {
-			e.printStackTrace();
-			System.exit(0);
-		} finally {
-			fw.close();
-		}
 			
 		return fixedBugs;
 
