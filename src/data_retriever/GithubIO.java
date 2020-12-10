@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,45 +62,54 @@ public class GithubIO {
 		return commitList;
 	}
 	
-	public HashMap<String,Date> getMapCommit(List<RepositoryCommit> commitList, List<String> ticketsIds){
+	private void updateCommitInfoForTicket(Map<String, Date> fixedCommitList, String ticketId, RepositoryCommit commit) {
+		String message = commit.getCommit().getMessage();
+		int index = message.indexOf(ticketId);
+		if (index == -1) {
+			return;
+		}
+
+		int checkIndex = index + ticketId.length();
+		if (checkIndex < message.length()) {
+			IntegerTool it = new IntegerTool();
+			if (it.isNumeric(message.substring(checkIndex, checkIndex + 1))) {
+				return;
+			} 
+		}
+
+		if (fixedCommitList.containsKey(ticketId)) {
+			// se avevo già trovato un commit che contiene quell'ID
+			Date oldDate = fixedCommitList.get(ticketId);
+			Date newDate = commit.getCommit().getCommitter().getDate();
+			if (oldDate.compareTo(newDate) < 0) {
+				fixedCommitList.put(ticketId, newDate);
+			} 
+		}else {
+			// se è il primo commit contenente quell'ID
+			Date newDate = commit.getCommit().getCommitter().getDate();
+			fixedCommitList.put(ticketId, newDate);
+		}
+	}
+	
+	private void findLastCommitForTicket(Map<String, Date> fixedCommitList, String ticketId, List<RepositoryCommit> commitList) {
+		for (RepositoryCommit commit : commitList) {
+			updateCommitInfoForTicket(fixedCommitList, ticketId, commit);
+
+		}
+	}
+	
+	public Map<String,Date> getMapCommit(List<RepositoryCommit> commitList, List<String> ticketsIds){
 		// Clean list of commits
 		HashMap<String, Date> fixedCommitList = new HashMap<>();
 		for (String ticketId : ticketsIds) {
-			for (RepositoryCommit commit : commitList) {
-				
-				String message = commit.getCommit().getMessage();
-				int index = message.indexOf(ticketId);
-				if (index != -1) {
-
-					int checkIndex = index + ticketId.length();
-					if (checkIndex < message.length()) {
-						IntegerTool it = new IntegerTool();
-						if (it.isNumeric(message.substring(checkIndex, checkIndex + 1))) {
-							continue;
-						} 
-					}
-		
-					if (fixedCommitList.containsKey(ticketId)) {
-						// se avevo già trovato un commit che contiene quell'ID
-						Date oldDate = fixedCommitList.get(ticketId);
-						Date newDate = commit.getCommit().getCommitter().getDate();
-						if (oldDate.compareTo(newDate) < 0) {
-							fixedCommitList.put(ticketId, newDate);
-						} 
-					}else {
-						// se è il primo commit contenente quell'ID
-						Date newDate = commit.getCommit().getCommitter().getDate();
-						fixedCommitList.put(ticketId, newDate);
-					}
-				}
-			}
+			findLastCommitForTicket(fixedCommitList, ticketId, commitList);
 
 		}
 		return fixedCommitList;
 	}
 	
 	
-	public List<String> getCommitData(HashMap<String, Date> fixedCommitList) throws IOException {
+	public List<String> getCommitData(Map<String, Date> fixedCommitList){
 		// Create a list of date
 		ArrayList<String> dateList = new ArrayList<>();
 		for (Date dateCommit : fixedCommitList.values()) {

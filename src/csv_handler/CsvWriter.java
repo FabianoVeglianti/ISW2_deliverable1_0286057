@@ -69,7 +69,7 @@ public class CsvWriter {
 			
 			List<RepositoryCommit> repositoryCommitList = githubHandler.getCommitList();
 			
-			HashMap<String, Date> fixedCommitList = githubHandler.getMapCommit(repositoryCommitList, fixedBugs);
+			HashMap<String, Date> fixedCommitList = (HashMap<String, Date>) githubHandler.getMapCommit(repositoryCommitList, fixedBugs);
 			dateList = (ArrayList<String>) githubHandler.getCommitData(fixedCommitList);
 			
 			
