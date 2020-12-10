@@ -57,16 +57,10 @@ public class JiraIn {
 			
 				fixedBugs.add(key);	
 				
-				try {
-					
-					fw.write(issues.getJSONObject(i % 1000).toString()+"\n");
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-					fw.close();
-					System.exit(0);
-				}
 				
+					
+				fw.write(issues.getJSONObject(i % 1000).toString()+"\n");
+	
 				
 			}
 			

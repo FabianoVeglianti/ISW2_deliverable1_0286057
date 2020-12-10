@@ -17,7 +17,7 @@ import org.json.JSONException;
 import data_retriever.GithubIO;
 import data_retriever.JiraIn;
 import date_tools.DateTool;
-import exception.IncompatibleSizesException;
+import exceptions.IncompatibleSizesException;
 
 public class CsvWriter {
 
