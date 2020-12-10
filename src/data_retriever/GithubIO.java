@@ -61,9 +61,7 @@ public class GithubIO {
 		return commitList;
 	}
 	
-
-	public List<String> getCommitData(List<RepositoryCommit> commitList, List<String> ticketsIds) throws IOException {
-
+	public HashMap<String,Date> getMapCommit(List<RepositoryCommit> commitList, List<String> ticketsIds){
 		// Clean list of commits
 		HashMap<String, Date> fixedCommitList = new HashMap<>();
 		for (String ticketId : ticketsIds) {
@@ -71,10 +69,8 @@ public class GithubIO {
 				
 				String message = commit.getCommit().getMessage();
 				int index = message.indexOf(ticketId);
-				if (index == -1) {
-					// do nothing
-				} else {
-				
+				if (index != -1) {
+
 					int checkIndex = index + ticketId.length();
 					if (checkIndex < message.length()) {
 						IntegerTool it = new IntegerTool();
@@ -91,15 +87,19 @@ public class GithubIO {
 							fixedCommitList.put(ticketId, newDate);
 						} 
 					}else {
-					// se è il primo commit contenente quell'ID
-					Date newDate = commit.getCommit().getCommitter().getDate();
-					fixedCommitList.put(ticketId, newDate);
+						// se è il primo commit contenente quell'ID
+						Date newDate = commit.getCommit().getCommitter().getDate();
+						fixedCommitList.put(ticketId, newDate);
 					}
 				}
 			}
 
 		}
-		
+		return fixedCommitList;
+	}
+	
+	
+	public List<String> getCommitData(HashMap<String, Date> fixedCommitList) throws IOException {
 		// Create a list of date
 		ArrayList<String> dateList = new ArrayList<>();
 		for (Date dateCommit : fixedCommitList.values()) {

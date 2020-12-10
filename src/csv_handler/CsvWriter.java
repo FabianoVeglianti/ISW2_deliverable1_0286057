@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,8 +69,11 @@ public class CsvWriter {
 			
 			List<RepositoryCommit> repositoryCommitList = githubHandler.getCommitList();
 			
+			HashMap<String, Date> fixedCommitList = githubHandler.getMapCommit(repositoryCommitList, fixedBugs);
+			dateList = (ArrayList<String>) githubHandler.getCommitData(fixedCommitList);
 			
-			dateList = (ArrayList<String>) githubHandler.getCommitData(repositoryCommitList, fixedBugs);
+			
+			
 		} catch (IOException e) {
 			logger.log(Level.WARNING, e.getMessage());
 			System.exit(1);
