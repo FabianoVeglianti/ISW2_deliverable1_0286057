@@ -32,7 +32,7 @@ public class GithubIO {
 		//empty constructor
 	}
 	
-	private List<RepositoryCommit> getCommitList() throws IOException{
+	public List<RepositoryCommit> getCommitList() throws IOException{
 		/*
 		 * Login in Github is needed to avoid API limit call to get commit for the repo.
 		 */
@@ -62,9 +62,7 @@ public class GithubIO {
 	}
 	
 
-	public List<String> getCommitData(List<String> ticketsIds) throws IOException {
-
-		List<RepositoryCommit> commitList = getCommitList();
+	public List<String> getCommitData(List<RepositoryCommit> commitList, List<String> ticketsIds) throws IOException {
 
 		// Clean list of commits
 		HashMap<String, Date> fixedCommitList = new HashMap<>();

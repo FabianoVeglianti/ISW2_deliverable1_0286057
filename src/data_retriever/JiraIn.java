@@ -63,6 +63,7 @@ public class JiraIn {
 					
 				} catch (Exception e) {
 					e.printStackTrace();
+					fw.close();
 					System.exit(0);
 				}
 				

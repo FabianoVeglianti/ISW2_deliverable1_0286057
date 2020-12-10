@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.egit.github.core.RepositoryCommit;
 import org.json.JSONException;
 
 import data_retriever.GithubIO;
@@ -63,7 +64,11 @@ public class CsvWriter {
 		GithubIO githubHandler = new GithubIO();
 		ArrayList<String> dateList = null;
 		try {
-			dateList = (ArrayList<String>) githubHandler.getCommitData(fixedBugs);
+			
+			List<RepositoryCommit> repositoryCommitList = githubHandler.getCommitList();
+			
+			
+			dateList = (ArrayList<String>) githubHandler.getCommitData(repositoryCommitList, fixedBugs);
 		} catch (IOException e) {
 			logger.log(Level.WARNING, e.getMessage());
 			System.exit(1);
