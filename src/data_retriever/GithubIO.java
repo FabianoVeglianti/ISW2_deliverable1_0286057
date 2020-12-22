@@ -33,13 +33,16 @@ public class GithubIO {
 		//empty constructor
 	}
 	
+	/**
+	 * Restituisce la lista dei commits sul branch master di una repository.
+	 * */
 	public List<RepositoryCommit> getCommitList() throws IOException{
 		/*
 		 * Login in Github is needed to avoid API limit call to get commit for the repo.
 		 */
 		GitHubClient client = new GitHubClient();
 		BufferedReader variabile = new BufferedReader(new InputStreamReader(System.in));
-		myLogger.log(Level.INFO,"Interire il token");
+		myLogger.log(Level.CONFIG,"Interire il token");
 		String token = null;
 		token = variabile.readLine();
 		
@@ -62,6 +65,12 @@ public class GithubIO {
 		return commitList;
 	}
 	
+	/**
+	 * Inserisce nella mappa fixedCommitList una coppia ticketID-data con data la data del commit passato come parametro se:
+	 * ticketID è contenuto nel commento del commit e non esiste già un elemento con la stessa chiave nella mappa, oppure se
+	 * ticketID è contenuto nel commento del commit e esiste già un elemento con la stessa chiave nella mappa, ma la data associata è precedente
+	 * alla data del commit passato come parametro.
+	 * */
 	private void updateCommitInfoForTicket(Map<String, Date> fixedCommitList, String ticketId, RepositoryCommit commit) {
 		String message = commit.getCommit().getMessage();
 		int index = message.indexOf(ticketId);
@@ -91,6 +100,9 @@ public class GithubIO {
 		}
 	}
 	
+	/**
+	 * Per ogni commit invoca updateCommitInfoForTicket().
+	 * */
 	private void findLastCommitForTicket(Map<String, Date> fixedCommitList, String ticketId, List<RepositoryCommit> commitList) {
 		for (RepositoryCommit commit : commitList) {
 			updateCommitInfoForTicket(fixedCommitList, ticketId, commit);
@@ -98,6 +110,9 @@ public class GithubIO {
 		}
 	}
 	
+	/**
+	 * Per ogni ticket invoca findLastCommitForTicket()
+	 * */
 	public Map<String,Date> getMapCommit(List<RepositoryCommit> commitList, List<String> ticketsIds){
 		// Clean list of commits
 		HashMap<String, Date> fixedCommitList = new HashMap<>();
@@ -108,7 +123,9 @@ public class GithubIO {
 		return fixedCommitList;
 	}
 	
-	
+	/**
+	 * Data una mappa i cui valori sono oggetti Date, restituisce una lista di questi valori trasformati in oggetti String con formato "yyyy-MM"
+	 * */
 	public List<String> getCommitData(Map<String, Date> fixedCommitList){
 		// Create a list of date
 		ArrayList<String> dateList = new ArrayList<>();

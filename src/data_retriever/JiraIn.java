@@ -16,9 +16,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JiraIn {
-/** Classe per ottenere la lista dei bug fixati da Jira*/
+
 	private static Logger myLogger = Logger.getLogger("InfoLogging");
 
+	/**
+	 * Ritorna una lista di stringhe rappresentanti gli id dei tickets relativi ai bug con status closed o resolved e resolution = fixed
+	 * */
 	public List<String> getfixedBugs(String projName) throws JSONException, IOException {
 		Integer j = 0;
 		Integer i = 0;

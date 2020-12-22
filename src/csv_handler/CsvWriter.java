@@ -24,6 +24,9 @@ public class CsvWriter {
 	private static final String FILENAME = "processControlData.csv";
 	private static final String PROJNAME = "VCL";
 	
+	/**
+	 * Crea un dataset con colonne mese,numero_di_buxfix.
+	 * */
 	public void writeFile(List<String> dates, List<Integer> frequencies) throws IOException, IncompatibleSizesException {
 		
 		int datesSize = dates.size();

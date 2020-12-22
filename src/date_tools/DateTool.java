@@ -8,6 +8,10 @@ import java.util.Set;
 
 public class DateTool {
 
+	
+	/**
+	 * Data una lista di date (anno-mese) aggiunge le date mancanti partendo dal primo elemento della lista fino all'ultimo.
+	 */
 	public void addMissingDates(List<String> date) {
 	//This function adds all the missing dates in date from the first present date to the last present date
 		String firstDate = date.get(0);
@@ -23,6 +27,9 @@ public class DateTool {
 		}
 	}
 	
+	/**
+	 * Data una stringa rappresentante una data (anno-mese) restituisce una stringa rappresentante la data successiva in ordine cronologico.
+	 * */
 	private String next(String date) {
 	//Given a date as string "yyyy-mm" it returns the next date as string "yyyy-mm"
 		String nextDate = null;
@@ -49,6 +56,9 @@ public class DateTool {
 		return nextDate;
 	}
 	 
+	/**
+	 * Dato una lista di Stringhe rappresentanti date, restituisce un insieme ordinato delle medesime
+	 * */
 	public List<String> getOrderedSet(List<String> dateList){ 
 		// Create a set of date taken from the list, there are not replicated dates, dates are sorted
 		Set<String> uniqueDateSet = new HashSet<>(dateList);
@@ -58,6 +68,9 @@ public class DateTool {
 		return uniqueDateList;
 	}
 	
+	/**
+	 * Dati una lista e un insieme, ritorna una lista di interi rappresentanti la frequenza di ogni elemento dell'insieme nella lista.
+	 */
 	public List<Integer> computeFrequency(List<String> dateSet, List<String> dateList){
 		// Count the frequency of each date in the list of dates
 		ArrayList<Integer> dateFrequency = new ArrayList<>();
