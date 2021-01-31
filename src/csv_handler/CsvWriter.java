@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.egit.github.core.RepositoryCommit;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.json.JSONException;
 
 import data_retriever.GithubIO;
@@ -50,7 +50,7 @@ public class CsvWriter {
 	}
 	
 	public static void main(String[] args) {
-		
+		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
 		Logger logger = null;
 		logger = Logger.getLogger(CsvWriter.class.getName());
 		
@@ -67,20 +67,12 @@ public class CsvWriter {
 
 		logger.log(Level.INFO,"Retrieving the list of bugfix dates");
 		GithubIO githubHandler = new GithubIO();
+		githubHandler.init();
 		ArrayList<String> dateList = null;
-		try {
-			
-			List<RepositoryCommit> repositoryCommitList = githubHandler.getCommitList();
-			
-			HashMap<String, Date> fixedCommitList = (HashMap<String, Date>) githubHandler.getMapCommit(repositoryCommitList, fixedBugs);
-			dateList = (ArrayList<String>) githubHandler.getCommitData(fixedCommitList);
-			
-			
-			
-		} catch (IOException e) {
-			logger.log(Level.WARNING, e.getMessage());
-			System.exit(1);
-		}
+		List<RevCommit> repositoryCommitList = githubHandler.getCommitList();
+		
+		HashMap<String, Date> fixedCommitList = (HashMap<String, Date>) githubHandler.getMapCommit(repositoryCommitList, fixedBugs);
+		dateList = (ArrayList<String>) githubHandler.getCommitData(fixedCommitList);
 		
 
 		//Date managing

@@ -1,8 +1,11 @@
 package data_retriever;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
@@ -10,14 +13,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.RepositoryCommit;
-import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.service.CommitService;
-import org.eclipse.egit.github.core.service.RepositoryService;
+
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import numeric_tools.IntegerTool;
 
@@ -25,44 +27,98 @@ import numeric_tools.IntegerTool;
 public class GithubIO {
 	/** Classe per ottenere la lista dei bug fixati da GitHub */
 	
-	private static Logger myLogger = Logger.getLogger("InfoLogging");
 	private static final String PROJNAMEMIN = "vcl";
-	private static final String COMPANYNAMEMIN = "apache";
-
+	private final String url = "https://github.com/apache/";
+	private Git git;
+	private static final String REPOLOCALPATH = "./vclRepo";
+	
+	
 	public GithubIO() {
 		//empty constructor
 	}
 	
+	private boolean isEmpty(Path path) {
+	    if (Files.isDirectory(path)) {
+	        try (DirectoryStream<Path> directory = Files.newDirectoryStream(path)) {
+	            return !directory.iterator().hasNext();
+	        } catch(IOException e) {
+	        	e.printStackTrace();
+	        }
+	    }
+	    return false;
+	}
+	
 	/**
-	 * Restituisce la lista dei commits sul branch master di una repository.
+	 * Inizializza l'oggetto Git effettuando il clone o il checkout della repository 
 	 * */
-	public List<RepositoryCommit> getCommitList() throws IOException{
-		/*
-		 * Login in Github is needed to avoid API limit call to get commit for the repo.
-		 */
-		GitHubClient client = new GitHubClient();
-		BufferedReader variabile = new BufferedReader(new InputStreamReader(System.in));
-		myLogger.log(Level.CONFIG,"Interire il token");
-		String token = null;
-		token = variabile.readLine();
+	public void init() {
+		String uri = url + PROJNAMEMIN + ".git";
+		try {
+			
+			if (!Files.exists(Paths.get(REPOLOCALPATH)) || this.isEmpty(Paths.get(REPOLOCALPATH))) {
+				git = Git.cloneRepository().setURI(uri).setDirectory(new File(REPOLOCALPATH)).call();
+			} else {
+				git = Git.open(new File(REPOLOCALPATH));
+				git.checkout().setName(this.getDefaultBranchName()).call();
+				git.pull().call();
+			}
 		
-		client.setOAuth2Token(token);
-		
-		RepositoryService service = new RepositoryService(client);
-		// Searching for the repository
-		Repository repo = null;
-		CommitService commitService = null;
-		List<RepositoryCommit> commitList = null;
-		
-		repo = service.getRepository(COMPANYNAMEMIN, PROJNAMEMIN);
-		
-		commitService = new CommitService(client);
-		
-		// Grep all commit of the repository
-		myLogger.info("Creating " + COMPANYNAMEMIN + "/" + PROJNAMEMIN + " repository commit list ...");
-		commitList = commitService.getCommits(repo);
-		
-		return commitList;
+		} catch (GitAPIException | IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	/**
+	 * Ottiene il nome del branch di default
+	 * */
+	private String getDefaultBranchName() {
+		try {
+		    List<Ref> branches = git.branchList().setListMode(ListMode.ALL).call();
+			for (Ref branch: branches) {
+				String branchName = branch.getName();
+				if (branchName.startsWith("refs/heads/")) {
+					int startIndex = "refs/heads/".length();
+					return branchName.substring(startIndex);
+				}
+			}
+			
+	    } catch (GitAPIException e) {
+	    	e.printStackTrace();
+	    	System.exit(0);
+	    }
+		return "";
+	}
+	
+	
+	public List<RevCommit> getCommitList(){
+		List<RevCommit> commits = new ArrayList<>();  
+	    Iterable<RevCommit> iterableCommits = null;
+	 
+	    try {
+			git.checkout().setName(this.getDefaultBranchName()).call();
+			iterableCommits = git.log().call();
+		} catch (GitAPIException e) {
+			e.printStackTrace();
+		} 
+
+	    for(RevCommit commit: iterableCommits) {
+	    	commits.add(commit);
+	    }
+	    
+	    return commits;
+	}
+	
+	/**
+	 * Per ogni ticket invoca findLastCommitForTicket()
+	 * */
+	public Map<String,Date> getMapCommit(List<RevCommit> commitList, List<String> ticketsIds){
+		// Clean list of commits
+		HashMap<String, Date> fixedCommitList = new HashMap<>();
+		for (String ticketId : ticketsIds) {
+			findLastCommitForTicket(fixedCommitList, ticketId, commitList);
+
+		}
+		return fixedCommitList;
 	}
 	
 	/**
@@ -71,8 +127,8 @@ public class GithubIO {
 	 * ticketID è contenuto nel commento del commit e esiste già un elemento con la stessa chiave nella mappa, ma la data associata è precedente
 	 * alla data del commit passato come parametro.
 	 * */
-	private void updateCommitInfoForTicket(Map<String, Date> fixedCommitList, String ticketId, RepositoryCommit commit) {
-		String message = commit.getCommit().getMessage();
+	private void updateCommitInfoForTicket(Map<String, Date> fixedCommitList, String ticketId, RevCommit commit) {
+		String message = commit.getFullMessage();
 		int index = message.indexOf(ticketId);
 		if (index == -1) {
 			return;
@@ -89,13 +145,13 @@ public class GithubIO {
 		if (fixedCommitList.containsKey(ticketId)) {
 			// se avevo già trovato un commit che contiene quell'ID
 			Date oldDate = fixedCommitList.get(ticketId);
-			Date newDate = commit.getCommit().getCommitter().getDate();
+			Date newDate = new Date(commit.getCommitTime() *1000L);
 			if (oldDate.compareTo(newDate) < 0) {
 				fixedCommitList.put(ticketId, newDate);
 			} 
 		}else {
 			// se è il primo commit contenente quell'ID
-			Date newDate = commit.getCommit().getCommitter().getDate();
+			Date newDate = new Date(commit.getCommitTime() *1000L);
 			fixedCommitList.put(ticketId, newDate);
 		}
 	}
@@ -103,25 +159,13 @@ public class GithubIO {
 	/**
 	 * Per ogni commit invoca updateCommitInfoForTicket().
 	 * */
-	private void findLastCommitForTicket(Map<String, Date> fixedCommitList, String ticketId, List<RepositoryCommit> commitList) {
-		for (RepositoryCommit commit : commitList) {
+	private void findLastCommitForTicket(Map<String, Date> fixedCommitList, String ticketId, List<RevCommit> commitList) {
+		for (RevCommit commit : commitList) {
 			updateCommitInfoForTicket(fixedCommitList, ticketId, commit);
 
 		}
 	}
 	
-	/**
-	 * Per ogni ticket invoca findLastCommitForTicket()
-	 * */
-	public Map<String,Date> getMapCommit(List<RepositoryCommit> commitList, List<String> ticketsIds){
-		// Clean list of commits
-		HashMap<String, Date> fixedCommitList = new HashMap<>();
-		for (String ticketId : ticketsIds) {
-			findLastCommitForTicket(fixedCommitList, ticketId, commitList);
-
-		}
-		return fixedCommitList;
-	}
 	
 	/**
 	 * Data una mappa i cui valori sono oggetti Date, restituisce una lista di questi valori trasformati in oggetti String con formato "yyyy-MM"

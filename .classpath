@@ -8,6 +8,10 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="jars/gson-2.8.2.jar"/>
 	<classpathentry kind="lib" path="jars/java-json.jar"/>
-	<classpathentry kind="lib" path="jars/org.eclipse.egit.github.core-2.1.5.jar"/>
+	<classpathentry kind="lib" path="jars/org.eclipse.jgit-5.9.0.202009080501-r.jar"/>
+	<classpathentry kind="lib" path="jars/slf4j-log4j12-1.7.2.jar"/>
+	<classpathentry kind="lib" path="jars/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="jars/slf4j-api-1.7.2.jar"/>
+	<classpathentry kind="lib" path="jars/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
