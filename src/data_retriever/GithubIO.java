@@ -21,6 +21,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import date_tools.DateCreator;
 import numeric_tools.IntegerTool;
 
 
@@ -28,7 +29,7 @@ public class GithubIO {
 	/** Classe per ottenere la lista dei bug fixati da GitHub */
 	
 	private static final String PROJNAMEMIN = "vcl";
-	private final String url = "https://github.com/apache/";
+	private static final String URL = "https://github.com/apache/";
 	private Git git;
 	private static final String REPOLOCALPATH = "./vclRepo";
 	
@@ -52,7 +53,7 @@ public class GithubIO {
 	 * Inizializza l'oggetto Git effettuando il clone o il checkout della repository 
 	 * */
 	public void init() {
-		String uri = url + PROJNAMEMIN + ".git";
+		String uri = URL + PROJNAMEMIN + ".git";
 		try {
 			
 			if (!Files.exists(Paths.get(REPOLOCALPATH)) || this.isEmpty(Paths.get(REPOLOCALPATH))) {
@@ -89,7 +90,9 @@ public class GithubIO {
 		return "";
 	}
 	
-	
+	/**
+	 * Ottiene la lista dei commits sul branch master
+	 */
 	public List<RevCommit> getCommitList(){
 		List<RevCommit> commits = new ArrayList<>();  
 	    Iterable<RevCommit> iterableCommits = null;
@@ -145,13 +148,13 @@ public class GithubIO {
 		if (fixedCommitList.containsKey(ticketId)) {
 			// se avevo già trovato un commit che contiene quell'ID
 			Date oldDate = fixedCommitList.get(ticketId);
-			Date newDate = new Date(commit.getCommitTime() *1000L);
+			Date newDate = DateCreator.getDateFromEpoch(commit.getCommitTime() *1000L);
 			if (oldDate.compareTo(newDate) < 0) {
 				fixedCommitList.put(ticketId, newDate);
 			} 
 		}else {
 			// se è il primo commit contenente quell'ID
-			Date newDate = new Date(commit.getCommitTime() *1000L);
+			Date newDate = DateCreator.getDateFromEpoch(commit.getCommitTime() *1000L);
 			fixedCommitList.put(ticketId, newDate);
 		}
 	}
